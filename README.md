@@ -1,7 +1,7 @@
-Clip Player
+#Clip Player
 Based on Random Clip Player: https://github.com/ShaderWave/RandomClipPlayer
 
-Setup
+#Setup
 You are required to create a Twitch developer application in order for this to function. If you have already created one and have the Client ID and Client Secret, skip to Step 8.
 
 Visit https://dev.twitch.tv/ and Login.
