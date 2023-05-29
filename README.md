@@ -4,6 +4,8 @@ Based on Random Clip Player: https://github.com/ShaderWave/RandomClipPlayer by S
 # Setup
 You are required to create a Twitch developer application in order for this to function. If you have already created one and have the Client ID and Client Secret, skip to Step 7.
 
+This edited version of Random Clip Player I made for me and some friends. The file picks a random user from the USERS array and takes 100 clips from the user's channel. Then it randomly picks one of those clips to play. After a clip it plays, it picks a new user and picks one of the new user's clips. 
+
 Visit https://dev.twitch.tv/ and Login.
 1. Press "Your Console" in the top right.
 2. Under "Applications" press "Register Your Application"
