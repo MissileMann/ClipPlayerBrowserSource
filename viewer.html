@@ -6,18 +6,20 @@
         const CLIENT_ID = "ID"
         const CLIENT_SECRET = "SECRET"
         const USERS = ["USER1", "USER2", "USER3"]; //you can add as many users as you want.
+        const YOURUSERNAME = "ENTER_USERNAME_HERE"; //only needed if you want to include your own clips in the USERS array above and don't want your name to pop up on the top right corner.
         const VOLUME_PERCENT = 50
+        // put the client id and client secret from the dev.twitch.tv site into it's respective variable above
         // put any number of twitch usernames in USERS and it will randomly pick from the pool of users
         // below is just all the code that makes this work. once you've configured the settings above, you're good to go!
         // -ShaderWave
 
+        //-----------------------------------------------------------------------------------------------------------------------------------//
+
+
         let randomUser;
-        let lastUser = "nothing";
-        let secondlastUser = "nothing";
-        let thirdlastUser = "nothing";
-
-
-
+        let lastUser = "";
+        let secondlastUser = "";
+        let thirdlastUser = "";
         
         //var randomUser = users[Math.floor(Math.random() * users.length)];
         // Utility functions
@@ -62,31 +64,17 @@
             return BROADCASTER_ID;
         }
 
-        let CLIPS_PAGINATION = null
-        async function getTopClips() {
-            let response = await authenticatedFetch(`https://api.twitch.tv/helix/clips?first=100&broadcaster_id=${await getBroadcasterId()}${CLIPS_PAGINATION ? `&after=${CLIPS_PAGINATION}` : ""}`);
-            let body = await response.json();
-
-            CLIPS_PAGINATION = body.pagination.cursor;
-            return body;
-        }
-
         async function getRandomClips() {
             let clips = []
 
-            const max = 1
             let pagination = null;
-            for (let i = 0; i < max; i++) { // top 1000 clips
-                let response = await authenticatedFetch(`https://api.twitch.tv/helix/clips?first=100&broadcaster_id=${await getBroadcasterId()}${pagination ? `&after=${pagination}` : ""}`);
-                let body = await response.json()
+            
+            let response = await authenticatedFetch(`https://api.twitch.tv/helix/clips?first=100&broadcaster_id=${await getBroadcasterId()}${pagination ? `&after=${pagination}` : ""}`);
+            let body = await response.json()
 
-                pagination = body.pagination.cursor;
-                clips = clips.concat(body.data)
-
-                //const status = document.getElementById("status")
-                //status.innerText = "Loading Clips: " + Math.floor(((i + 1) / max) * 100) + "%"
-            }
-
+            pagination = body.pagination.cursor;
+            clips = clips.concat(body.data)
+            
             return clips;
         }
 
@@ -112,27 +100,34 @@
         async function playRandom() {
             const player = document.getElementById("player")
             const overlayText = document.getElementById("overlay")
-
+            const name = document.getElementById("overlay")
+            
             if (CLIP_PLAYING) {
                 CLIPS_TO_PLAY.splice(CLIPS_TO_PLAY.indexOf(CLIP_PLAYING), 1)
             }
-
-            const status = document.getElementById("status")
-
-            status.className = "statusText hide"
+            else {
+                name.className = "overlayText hide"
+            }
+            
+            
             CLIPS_TO_PLAY = []
             CLIPS_TO_PLAY = await getRandomClips()
-            status.className = "statusText hide"
 
             let random = Math.floor(Math.random() * Object.keys(CLIPS_TO_PLAY).length)
             const clip = CLIPS_TO_PLAY[Object.keys(CLIPS_TO_PLAY)[random]]
-
+            overlayText.innerText = clip.broadcaster_name;
+            
             CLIP_PLAYING = clip
-
+            name.className = "overlayText hide"
             player.pause()
+            
             player.src = getClipStreamURL(clip)
             player.play()
-            overlayText.innerText = clip.broadcaster_name;
+            if (clip.broadcaster_name != YOURUSERNAME) {
+                name.className = "overlayText"
+            }
+            
+            
         }
 
 
@@ -146,28 +141,11 @@
     <div class="container">
         <video id="player" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: -1;"></video>
         <div id="overlay" class="overlayText"></div>
-        <h1 id="status" class="statusText">Eating Sweetrolls</h1>
     </div>
 </body>
 
 <head>
     <style>
-        .statusText {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-
-            color: rgb(255, 255, 255);
-            background-color: black;
-            padding: 4px 8px 4px 8px;
-            border-radius: 4px;
-        }
-
-        .statusText.hide {
-            display: none;
-        }
-
         .container {
             position: relative;
             width: 100%;
@@ -176,9 +154,8 @@
 
         .overlayText {
             position: absolute;
-            /*These calcs are used to track the bottom corner of the video as it holds its aspect ratio while the window is resized
-            top: calc((100vh - min(100vh/9, 100vw/16)*9)/2 + min(100vh/9, 100vw/16)*9 - 40px);*/
-            top: calc(15px);
+            /*These calcs are used to track the bottom corner of the video as it holds its aspect ratio while the window is resized*/
+            top: calc(2vh);
             right: calc((100vw - min(100vh/9, 100vw/16)*16)/2 + 1.2vw);
             
             color: rgb(240, 240, 255);
@@ -188,6 +165,10 @@
             background-color: rgba(0, 0, 0, 0.8);
             padding: 8px 8px 8px 8px;
             font-family: 'Gill Sans', sans-serif;
+        }
+
+        .overlayText.hide {
+            display: none;
         }
         
     </style>
